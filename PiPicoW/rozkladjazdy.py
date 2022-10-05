@@ -40,27 +40,27 @@ except KeyboardInterrupt:
     machine.reset()
     pico_led.off()
     
-res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875')
+#res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875')
+res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444')
 text = res.text
-text = r'{"tresc":"<table class=\"tablicagmv\">\r\n\t<thead><tr><th class=\"gmvlinia\">linia<\/th><th class=\"gmvkierunek\">kierunek<\/th><th class=\"gmvgodzina\">odjazd<\/th><\/tr><\/thead>\r\n\t<tbody>\r\n\t\t<tr><td class=\"gmvlinia\">9<\/td><td class=\"gmvkierunek\">Potulicka<\/td><td class=\"gmvgodzina\">za&nbsp;2&nbsp;min<\/td><\/tr>\r\n\t\t<tr><td class=\"gmvlinia\">9<\/td><td class=\"gmvkierunek\">Potulicka<\/td><td class=\"gmvgodzina\">za&nbsp;20&nbsp;min<\/td><\/tr>\r\n\t\t<tr><td class=\"gmvlinia\">9<\/td><td class=\"gmvkierunek\">Potulicka<\/td><td class=\"gmvgodzina\">17:40<\/td><\/tr>\r\n\t\t<tr><td class=\"gmvlinia\">9<\/td><td class=\"gmvkierunek\">Potulicka<\/td><td class=\"gmvgodzina\">17:52<\/td><\/tr>\r\n\t\t<tr><td class=\"gmvlinia\">9<\/td><td class=\"gmvkierunek\">Potulicka<\/td><td class=\"gmvgodzina\">18:04<\/td><\/tr>\r\n\t<\/tbody>\r\n<\/table>","komunikat":""}'
 print(text)
-
+text = text.replace('&nbsp;',' ')
 
 flag = 1
 while flag == 1:
-    m = re.search(r'">(.+?)<\\', text)
+    m = re.search(r'">(.+?)<\\*', text)
     if m:
         flag = 1
         found = m.group(1)
         ind = m.span()[1]
         text = text[ind:]
         print('\n',found,'\n')
-        print(ind)
-        print(len(found))
         print('\n',text,'\n')
     else:
         flag = 0
         #print(dir(m.group(1)))
-print("KAAAAACZKI")
+print("------------------------")
 
+# wyswietlanie komunikatu przystanku
+print(res.json()['komunikat'])
         
