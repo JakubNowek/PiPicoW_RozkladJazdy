@@ -6,6 +6,13 @@ from picozero import pico_led
 import machine
 import re
 
+# TODO
+# automatyczny wybór WiFi
+# zmiana przystanków
+# zapisywanie odczytanych danych na liśie ********
+# wyświetlanie na wyświetlaczu
+
+
 
 # ssid = 'UPC7DDE84E'
 # password = 'yTu3mP8xedrs'
@@ -72,18 +79,18 @@ text = text.replace(r'\u017c','ż')
 text = text.replace(r'\u017b','Ż')
 #end = timer()
 
-flag = 1
-while flag == 1:
+flag = True
+while flag:
     m = re.search(r'">(.+?)<\\*', text)
     if m:
-        flag = 1
+        flag = True
         found = m.group(1)
         ind = m.span()[1]
         text = text[ind:]
         print('\n',found,'\n')
         #print('\n',text,'\n')
     else:
-        flag = 0
+        flag = False
         #print(dir(m.group(1)))
 print("------------------------")
 
