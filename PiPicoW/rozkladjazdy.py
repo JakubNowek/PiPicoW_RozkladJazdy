@@ -1,3 +1,9 @@
+# TODO
+# automatyczny wybór WiFi
+# zmiana przystanków
+# odświeżanie
+# wyświetlanie na wyświetlaczu
+
 import urequests as requests
 import network
 import socket
@@ -6,98 +12,100 @@ from picozero import pico_led
 import machine
 import re
 
-# TODO
-# automatyczny wybór WiFi
-# zmiana przystanków
-# zapisywanie odczytanych danych na liśie ********
-# wyświetlanie na wyświetlaczu
+
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
 
 
+def connect(wifi):
+    ssid = wifi[0]
+    passwd = wifi[1]
 
-# ssid = 'UPC7DDE84E'
-# password = 'yTu3mP8xedrs'
-
-ssid = 'StrazMiejska47853'
-password = '12345678'
-
-def connect():
     #Connect to WLAN
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    wlan.connect(ssid, password)
+    wlan.connect(ssid, passwd)
+    pico_led.off()
     
     while wlan.isconnected() == False:
         print('Waiting for connection...')
-        sleep(1) 
-    print(wlan.ifconfig())
+        sleep(0.8)
+        
+    print('Connected to:',wlan.ifconfig())
     pico_led.on()
+    return True
+  
+  
+def txtReplace(txt):
+    txt = txt.replace('&nbsp;',' ')
+    txt = txt.replace('<blink>&gt;&gt;&gt;','TERAZ')
+    txt = txt.replace(r'\u0105','ą')
+    #txt = txt.replace(r'\u0104','Ą')
+    txt = txt.replace(r'\u0107','ć')
+    #txt = txt.replace(r'\u0106','Ć')
+    txt = txt.replace(r'\u0119','ę')
+    #txt = txt.replace(r'\u0118','Ę')
+    txt = txt.replace(r'\u0142','ł')
+    txt = txt.replace(r'\u0141','Ł')
+    txt = txt.replace(r'\u0144','ń')
+    #txt = txt.replace(r'\u0143','Ń')
+    txt = txt.replace(r'\u00f3','ó')
+    #txt = txt.replace(r'\u00d3','Ó')
+    txt = txt.replace(r'\u015b','ś')
+    txt = txt.replace(r'\u015a','Ś')
+    txt = txt.replace(r'\u0179','ź')
+    txt = txt.replace(r'\u017a','Ź')
+    txt = txt.replace(r'\u017c','ż')
+    txt = txt.replace(r'\u017b','Ż')
+    return txt
+
+
+def getAndDisplay():
     
+    # Plac Galczynskiego (9)   
+    #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875')
+    # Bogumily (9,1)
+    #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444')
+    res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=86721&t=0.42515855861867013')
+    text = res.text
+    #print(text)
+
+    # zamiana znakow HTML i polskich 
+    #start = timer()
+    text = txtReplace(text)
+    #end = timer()
+
+    match = True
+    while match:
+        m = re.search(r'">(.+?)<\\*', text)
+        if m:
+            match = True
+            found = m.group(1)
+            ind = m.span()[1]
+            text = text[ind:]
+            print('\n',found,'\n')
+            #print('\n',text,'\n')
+        else:
+            match = False
+            #print(dir(m.group(1)))
+    print("------------------------")
+
+    # wyswietlanie komunikatu przystanku
+    print(res.json()['komunikat'])
+    #print('zamienianie czas',end-start)
     
-class pojazd:
-    numer = ""
-    kierunek = ""
-    odjazd = ""
-    
-tablica = []  
-    
-    
+
+# wczytywanie listy wifi jako tupli
+with open('config.txt', 'r') as f:
+    wifilist = [tuple(i.strip('\n\r').split(',')) for i in f]
+ 
 try:
-    connect()
+        connect(wifilist[1])
+        
 except KeyboardInterrupt:
     machine.reset()
     pico_led.off()
-   
-# Plac Galczynskiego (9)   
-#res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875')
-# Bogumily (9,1)
-#res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444')
-res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=86721&t=0.42515855861867013')
-text = res.text
-print(text)
 
-# zamiana znakow HTML i polskich 
-#start = timer()
-text = text.replace('&nbsp;',' ')
-text = text.replace('<blink>&gt;&gt;&gt;','TERAZ')
-text = text.replace(r'\u0105','ą')
-#text = text.replace(r'\u0104','Ą')
-text = text.replace(r'\u0107','ć')
-#text = text.replace(r'\u0106','Ć')
-text = text.replace(r'\u0119','ę')
-#text = text.replace(r'\u0118','Ę')
-text = text.replace(r'\u0142','ł')
-text = text.replace(r'\u0141','Ł')
-text = text.replace(r'\u0144','ń')
-#text = text.replace(r'\u0143','Ń')
-text = text.replace(r'\u00f3','ó')
-#text = text.replace(r'\u00d3','Ó')
-text = text.replace(r'\u015b','ś')
-text = text.replace(r'\u015a','Ś')
-text = text.replace(r'\u0179','ź')
-text = text.replace(r'\u017a','Ź')
-text = text.replace(r'\u017c','ż')
-text = text.replace(r'\u017b','Ż')
-#end = timer()
-
-flag = True
-while flag:
-    m = re.search(r'">(.+?)<\\*', text)
-    if m:
-        flag = True
-        found = m.group(1)
-        ind = m.span()[1]
-        text = text[ind:]
-        print('\n',found,'\n')
-        #print('\n',text,'\n')
-    else:
-        flag = False
-        #print(dir(m.group(1)))
-print("------------------------")
-
-# wyswietlanie komunikatu przystanku
-print(res.json()['komunikat'])
-
-#print('zamienianie czas',end-start)
-
-# s = "abc&def#ghi"
-# print(s.translate(str.maketrans({'&': '\&', '#': '\#'}))
+while wlan.isconnected() == True:
+    getAndDisplay()
+    
+    
+print('')
