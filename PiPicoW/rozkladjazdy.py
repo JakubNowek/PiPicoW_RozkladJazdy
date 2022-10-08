@@ -17,7 +17,8 @@ wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 pico_led.off()
 wlan.disconnect()
-a = []
+
+
 def connect(wifi):
     ssid = wifi[0]
     passwd = wifi[1]
@@ -40,7 +41,7 @@ def getAndDisplay():
     #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875')
     # Bogumily (9,1)
     try:
-        res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444') 
+        res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444', timeout=7) 
         #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=86721&t=0.42515855861867013')
         #print(text)
         text = res.text
@@ -61,7 +62,6 @@ def getAndDisplay():
                 #print(dir(m.group(1)))
         print(board)        
         print("------------------------")
-
         # wyswietlanie komunikatu przystanku
         print(res.json()['komunikat'])
         #print('zamienianie czas', end-start)
@@ -69,7 +69,6 @@ def getAndDisplay():
         wlan.disconnect()
 
 connected = False
-
 def interruptHandler():
     if wlan.isconnected() == True:
         print("is connected")
@@ -79,21 +78,24 @@ def interruptHandler():
         connected = False
     
 # generowanie przerwań cyklicznych do sprawdzania połączenia
-timer = Timer(period=10000, mode=Timer.PERIODIC, callback=lambda t: interruptHandler())
+#timer = Timer(period=10000, mode=Timer.PERIODIC, callback=lambda t: interruptHandler())
 
 # wczytywanie listy wifi jako tupli
 with open('config.txt', 'r') as f:
     wifilist = [tuple(i.strip('\n\r').split(',')) for i in f]
 
 
-while True:
-    print('petla')
-    
+while True:  
     if wlan.isconnected() == False:
+        print('Nawiązywanie połączenia')
         for n in range (0,3):
             connect(wifilist[n])
             if wlan.isconnected() == True:
                 break
+    else:
+        getAndDisplay()
+            
+            
     sleep(1)
     
 
