@@ -15,28 +15,22 @@ from replaceunicode import txtReplace
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-connecting = False
-
-
+pico_led.off()
+wlan.disconnect()
+a = []
 def connect(wifi):
-    connecting = True
     ssid = wifi[0]
     passwd = wifi[1]
     #Connect to WLAN
     wlan.connect(ssid, passwd)
-    pico_led.off()
-    timeout = 20
-    time_now = 0
-    while wlan.isconnected() == False and time_now < timeout:
-        print('Waiting for connection with', ssid)
-        sleep(1)
-        time_now +=1
+    print("connecting to", ssid)
+    sleep(7)
     if wlan.isconnected() == True:    
         print('Connected to:',wlan.ifconfig())
         pico_led.on()
     else:
-        print("connection timed out")
-    connecting = False
+        print("Connection timed out")
+        wlan.disconnect()
       
   
 def getAndDisplay():
@@ -70,39 +64,62 @@ def getAndDisplay():
 
         # wyswietlanie komunikatu przystanku
         print(res.json()['komunikat'])
-        #print('zamienianie czas',end-start)
+        #print('zamienianie czas', end-start)
     except:    
         wlan.disconnect()
 
+connected = False
 
 def interruptHandler():
-    if wlan.isconnected() == False and connecting == False:
-        print("Brak połączenia")
-        wlan.disconnect()
+    if wlan.isconnected() == True:
+        print("is connected")
+        connected = True
     else:
-        print("connected")     
-        
-        
-        
+        print("not connected")
+        connected = False
+    
 # generowanie przerwań cyklicznych do sprawdzania połączenia
 timer = Timer(period=10000, mode=Timer.PERIODIC, callback=lambda t: interruptHandler())
 
 # wczytywanie listy wifi jako tupli
 with open('config.txt', 'r') as f:
     wifilist = [tuple(i.strip('\n\r').split(',')) for i in f]
- 
 
 
 while True:
-    if wlan.isconnected() == True:
-        getAndDisplay()
-    else:    
-        print('No connection...')
-        print('Retrieving...')
-        try:
-            connect(wifilist[1])   
-        except KeyboardInterrupt:
-            machine.reset()
-            pico_led.off()
-print(dir(wlan))
-# print(wlan.scan())
+    print('petla')
+    
+    if wlan.isconnected() == False:
+        for n in range (0,3):
+            connect(wifilist[n])
+            if wlan.isconnected() == True:
+                break
+    sleep(1)
+    
+
+
+
+
+# wifiscan = wlan.scan()
+# 
+# accessableWifi = []
+# for network in wifiscan:
+#     for wifi in wifilist:
+#         if str(network[0].decode("utf-8")) == wifi[0]:
+#             accessableWifi.append(network[0].decode("utf-8"))
+# print('znaleziono', accessableWifi)
+
+
+# n = 0
+# 
+# while True:
+#     print('petla dziala nieskonczona')
+#     if n>2:
+#         n=0    
+#     if wlan.isconnected() == True:
+#         getAndDisplay()
+#     else:    
+#         print('No connection...')
+#         connect(wifilist[n])   
+#     n+=1
+#     sleep(1)
