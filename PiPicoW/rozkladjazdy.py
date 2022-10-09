@@ -24,7 +24,7 @@ def connect(wifi):
     passwd = wifi[1]
     #Connect to WLAN
     wlan.connect(ssid, passwd)
-    print("connecting to", ssid)
+    print("Connecting to", ssid)
     sleep(10)
     if wlan.isconnected() == True:    
         print('Connected to:',wlan.ifconfig())
@@ -34,17 +34,27 @@ def connect(wifi):
         wlan.disconnect()
     
     
-def accessableWifi(listOfWifi,WLAN):
-    wifiscan = WLAN.scan()
-    accessList = []
-    for network in wifiscan:
-        for wifi in listOfWifi:
+def connect_aval_wlan(list_of_wifi,wlan):
+    # znajdowanie dostępnych wifi z listy
+    wifi_scan = wlan.scan()
+    access_list = []
+    for network in wifi_scan:
+        for wifi in list_of_wifi:
             if str(network[0].decode("utf-8")) == wifi[0]:
-                accessList.append(wifi)
-    return accessList
+                access_list.append(wifi)
+    # łączenie ze znalezionymi sieciami              
+    print('Nawiązywanie połączenia')
+    if len(access_list) > 0:
+        for n in range (0, len(access_list)):
+            connect(access_list[n])
+            if wlan.isconnected() == True:
+                break
+    else:
+        print('No wifi avaliable')
+        sleep(4)             
 
 
-def getAndDisplay():
+def get_and_display():
     
     board = []
     try:
@@ -52,7 +62,6 @@ def getAndDisplay():
         #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875', timeout=15)
         # Bogumily (9,1)
         res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444', timeout=15) 
-        #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=86721&t=0.42515855861867013', timeout=15)
         #print(text)
         text = res.text
         # zamiana znakow HTML i polskich 
@@ -79,7 +88,7 @@ def getAndDisplay():
         print("HTTP response error")
 
 # connected = False
-# def interruptHandler():
+# def interrupt_handler():
 #     if wlan.isconnected() == True:
 #         print("is connected")
 #         connected = True
@@ -88,34 +97,28 @@ def getAndDisplay():
 #         connected = False
     
 # generowanie przerwań cyklicznych do sprawdzania połączenia
-#timer = Timer(period=10000, mode=Timer.PERIODIC, callback=lambda t: interruptHandler())
+#timer = Timer(period=10000, mode=Timer.PERIODIC, callback=lambda t: interrupt_handler())
 
 # wczytywanie listy wifi jako tupli
 with open('config.txt', 'r') as f:
-    wifilist = [tuple(i.strip('\n\r').split(',')) for i in f]
+    wifi_list = [tuple(i.strip('\n\r').split(',')) for i in f]
 
 
 end = timer()
 start = timer()
+
 while True:
+    
     while wlan.isconnected() == False:
-        avaliableWifi = accessableWifi(wifilist,wlan)
         start = timer()
-        print('Nawiązywanie połączenia')
-        if len(avaliableWifi) > 0:
-            for n in range (0, len(avaliableWifi)):
-                connect(avaliableWifi[n])
-                if wlan.isconnected() == True:
-                    break
-        else:
-            print('No wifi avaliable')
-            sleep(4)
+        connect_aval_wlan(wifi_list,wlan)   
         sleep(2)    
         end = timer()
         print('Zaktualizowano', (end-start)/1000,'sekund temu.')
+        
     start = timer()
     sleep(3)
-    getAndDisplay()
+    get_and_display()
     end = timer()
     print('Zaktualizowano', (end-start)/1000,'sekund temu.') 
 
