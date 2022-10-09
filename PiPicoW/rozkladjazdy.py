@@ -25,7 +25,7 @@ def connect(wifi):
     #Connect to WLAN
     wlan.connect(ssid, passwd)
     print("connecting to", ssid)
-    sleep(7)
+    sleep(10)
     if wlan.isconnected() == True:    
         print('Connected to:',wlan.ifconfig())
         pico_led.on()
@@ -37,12 +37,12 @@ def connect(wifi):
 def getAndDisplay():
     
     board = []
-    # Plac Galczynskiego (9)   
-    #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875')
-    # Bogumily (9,1)
     try:
-        res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444', timeout=7) 
-        #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=86721&t=0.42515855861867013')
+        # Plac Galczynskiego (9)   
+        #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875', timeout=15)
+        # Bogumily (9,1)
+        res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444', timeout=15) 
+        #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=86721&t=0.42515855861867013', timeout=15)
         #print(text)
         text = res.text
         # zamiana znakow HTML i polskich 
@@ -65,17 +65,17 @@ def getAndDisplay():
         # wyswietlanie komunikatu przystanku
         print(res.json()['komunikat'])
         #print('zamienianie czas', end-start)
-    except:    
-        wlan.disconnect()
+    except:
+        print("HTTP response error")
 
-connected = False
-def interruptHandler():
-    if wlan.isconnected() == True:
-        print("is connected")
-        connected = True
-    else:
-        print("not connected")
-        connected = False
+# connected = False
+# def interruptHandler():
+#     if wlan.isconnected() == True:
+#         print("is connected")
+#         connected = True
+#     else:
+#         print("not connected")
+#         connected = False
     
 # generowanie przerwań cyklicznych do sprawdzania połączenia
 #timer = Timer(period=10000, mode=Timer.PERIODIC, callback=lambda t: interruptHandler())
@@ -84,22 +84,25 @@ def interruptHandler():
 with open('config.txt', 'r') as f:
     wifilist = [tuple(i.strip('\n\r').split(',')) for i in f]
 
-
-while True:  
-    if wlan.isconnected() == False:
+end = timer()
+start = timer()
+while True:
+       
+    while wlan.isconnected() == False:
+        start = timer()
         print('Nawiązywanie połączenia')
-        for n in range (0,3):
+        for n in range (0, len(wifilist)):
             connect(wifilist[n])
             if wlan.isconnected() == True:
                 break
-    else:
-        getAndDisplay()
-            
-            
-    sleep(1)
+        end = timer()
+        print('Zaktualizowano', (end-start)/1000,'sekund temu.')
+    start = timer()    
+    getAndDisplay()
+    end = timer()
+    print('Zaktualizowano', (end-start)/1000,'sekund temu.') 
+
     
-
-
 
 
 # wifiscan = wlan.scan()
@@ -112,16 +115,3 @@ while True:
 # print('znaleziono', accessableWifi)
 
 
-# n = 0
-# 
-# while True:
-#     print('petla dziala nieskonczona')
-#     if n>2:
-#         n=0    
-#     if wlan.isconnected() == True:
-#         getAndDisplay()
-#     else:    
-#         print('No connection...')
-#         connect(wifilist[n])   
-#     n+=1
-#     sleep(1)
