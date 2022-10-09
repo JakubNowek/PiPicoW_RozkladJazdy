@@ -32,8 +32,18 @@ def connect(wifi):
     else:
         print("Connection timed out")
         wlan.disconnect()
-      
-  
+    
+    
+def accessableWifi(listOfWifi,WLAN):
+    wifiscan = WLAN.scan()
+    accessList = []
+    for network in wifiscan:
+        for wifi in listOfWifi:
+            if str(network[0].decode("utf-8")) == wifi[0]:
+                accessList.append(wifi)
+    return accessList
+
+
 def getAndDisplay():
     
     board = []
@@ -84,34 +94,31 @@ def getAndDisplay():
 with open('config.txt', 'r') as f:
     wifilist = [tuple(i.strip('\n\r').split(',')) for i in f]
 
+
 end = timer()
 start = timer()
 while True:
-       
     while wlan.isconnected() == False:
+        avaliableWifi = accessableWifi(wifilist,wlan)
         start = timer()
         print('Nawiązywanie połączenia')
-        for n in range (0, len(wifilist)):
-            connect(wifilist[n])
-            if wlan.isconnected() == True:
-                break
+        if len(avaliableWifi) > 0:
+            for n in range (0, len(avaliableWifi)):
+                connect(avaliableWifi[n])
+                if wlan.isconnected() == True:
+                    break
+        else:
+            print('No wifi avaliable')
+            sleep(4)
+        sleep(2)    
         end = timer()
         print('Zaktualizowano', (end-start)/1000,'sekund temu.')
-    start = timer()    
+    start = timer()
+    sleep(3)
     getAndDisplay()
     end = timer()
     print('Zaktualizowano', (end-start)/1000,'sekund temu.') 
 
-    
 
-
-# wifiscan = wlan.scan()
-# 
-# accessableWifi = []
-# for network in wifiscan:
-#     for wifi in wifilist:
-#         if str(network[0].decode("utf-8")) == wifi[0]:
-#             accessableWifi.append(network[0].decode("utf-8"))
-# print('znaleziono', accessableWifi)
 
 
