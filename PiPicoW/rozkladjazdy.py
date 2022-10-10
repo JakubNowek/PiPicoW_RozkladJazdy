@@ -58,6 +58,11 @@ def connect_aval_wlan(list_of_wifi,wlan):
         sleep(4)             
 
 
+def last_update_t():
+    last_update = localtime()
+    print(f'Last update - {last_update[3]}:{last_update[4]:02d}:{last_update[5]:02d}')
+
+
 def get_and_display(board_list):
     board = []
     try:
@@ -89,18 +94,15 @@ def get_and_display(board_list):
                 match = False
                 #print(dir(m.group(1)))
         print(board)
-        print(komunikat)
+        print('Komunikat:',komunikat)
+        last_update_t()
         print("------------------------")
-
-
-def last_update_t():
-    last_update = localtime()
-    print(f'Last update - {last_update[3]}:{last_update[4]:02d}:{last_update[5]:02d}')
 
     
 # generowanie przerwań cyklicznych do synchrnizacji czasu z serwerem ntp
 timer = Timer(period=18000000, mode=Timer.PERIODIC, callback=lambda t: ntptime.settime)
-    
+   
+# wczytywanie danych sieci i ur przystanków z pliku konfiguracyjnego   
 with open('config.json', 'r') as f:
     data = json.load(f)
     wifi_list = data['networks']
@@ -110,8 +112,6 @@ with open('config.json', 'r') as f:
 while True:
     while wlan.isconnected() == False:
         connect_aval_wlan(wifi_list,wlan)   
-        sleep(2)
-         
+        sleep(2)        
     sleep(3)
-    get_and_display(stops_list)
-    last_update_t() 
+    get_and_display(stops_list) 
