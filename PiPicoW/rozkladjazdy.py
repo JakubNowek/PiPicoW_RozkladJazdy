@@ -7,7 +7,8 @@
 import urequests as requests
 import network
 import socket
-from time import sleep, ticks_ms as timer
+import ntptime
+from time import sleep, localtime, ticks_ms as timer
 from picozero import pico_led
 from machine import reset, Timer
 import re
@@ -17,6 +18,8 @@ wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 pico_led.off()
 wlan.disconnect()
+
+ntptime.host = "tempus1.gum.gov.pl"
 
 
 def connect(wifi):
@@ -32,6 +35,7 @@ def connect(wifi):
     else:
         print("Connection timed out")
         wlan.disconnect()
+        pico_led.off()
     
     
 def connect_aval_wlan(list_of_wifi,wlan):
@@ -55,15 +59,19 @@ def connect_aval_wlan(list_of_wifi,wlan):
 
 
 def get_and_display():
-    
     board = []
     try:
         # Plac Galczynskiego (9)   
         #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875', timeout=15)
         # Bogumily (9,1)
-        res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444', timeout=15) 
-        #print(text)
-        text = res.text
+        page = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444', timeout=15).json()
+        # wyswietlanie komunikatu przystanku
+    except:
+        print("HTTP response error")
+    else:    
+        text = page["tresc"]
+        komunikat = page["komunikat"]
+        print(komunikat)
         # zamiana znakow HTML i polskich 
         text = txtReplace(text)
         
@@ -81,47 +89,25 @@ def get_and_display():
                 #print(dir(m.group(1)))
         print(board)        
         print("------------------------")
-        # wyswietlanie komunikatu przystanku
-        print(res.json()['komunikat'])
-        #print('zamienianie czas', end-start)
-    except:
-        print("HTTP response error")
 
-# connected = False
-# def interrupt_handler():
-#     if wlan.isconnected() == True:
-#         print("is connected")
-#         connected = True
-#     else:
-#         print("not connected")
-#         connected = False
+
+def last_update_t():
+    last_update = localtime()
+    print(f'Last update:{last_update[3]}:{last_update[4]}:{last_update[5]}')
+
     
-# generowanie przerwań cyklicznych do sprawdzania połączenia
-#timer = Timer(period=10000, mode=Timer.PERIODIC, callback=lambda t: interrupt_handler())
+# generowanie przerwań cyklicznych do synchrnizacji czasu z serwerem ntp
+timer = Timer(period=18000000, mode=Timer.PERIODIC, callback=lambda t: ntptime.settime)
 
 # wczytywanie listy wifi jako tupli
 with open('config.txt', 'r') as f:
     wifi_list = [tuple(i.strip('\n\r').split(',')) for i in f]
 
-
-end = timer()
-start = timer()
-
 while True:
-    
     while wlan.isconnected() == False:
-        start = timer()
         connect_aval_wlan(wifi_list,wlan)   
-        sleep(2)    
-        end = timer()
-        print('Zaktualizowano', (end-start)/1000,'sekund temu.')
-        
-    start = timer()
+        sleep(2)
+         
     sleep(3)
     get_and_display()
-    end = timer()
-    print('Zaktualizowano', (end-start)/1000,'sekund temu.') 
-
-
-
-
+    last_update_t() 
