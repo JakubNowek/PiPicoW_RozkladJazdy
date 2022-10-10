@@ -1,8 +1,7 @@
 # TODO
-# automatyczny wybór WiFi
 # zmiana przystanków
 # wyświetlanie na wyświetlaczu**
-# wyświetlanie polskich znaków***
+# wyświetlanie polskich znaków****
 
 import urequests as requests
 import network

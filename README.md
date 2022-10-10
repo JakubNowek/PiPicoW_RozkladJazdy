@@ -8,3 +8,8 @@ Raspberry Pi Pico W
 ## Programming language
 Micropython
 
+## Config file
+Plik config.json zawiera:
+- adresy ssid oraz hasła dostępu
+- adresy url tablic przystanków pobrane ze strony ZDiTM w Szczecinie
+

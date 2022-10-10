@@ -1,0 +1,12 @@
+{
+  "networks": [
+    ["SSID_1", "passwd_1"],
+    ["SSID_2", "passwd_2"],
+    ["SSID_3", "passwd_3"]
+  ],
+  "transport_stop": [
+      ["Name of the stop", "url","public transport lines"],
+      ["Plac Galczynskiego", "https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875","9"],
+      ["Bogumily", "https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=30812&t=0.8865995302992444","9_1"]
+  ]
+}
