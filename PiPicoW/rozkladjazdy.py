@@ -113,5 +113,5 @@ while True:
     while wlan.isconnected() == False:
         connect_aval_wlan(wifi_list,wlan)   
         sleep(2)        
-    sleep(3)
+    sleep(3)  # okres odświeżania
     get_and_display(stops_list) 
