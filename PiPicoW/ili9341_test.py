@@ -8,6 +8,7 @@ from machine import Pin, SPI
 from sys import implementation
 from os import uname
 from xglcd_font import XglcdFont
+import re
 
 led = Pin(21, Pin.OUT)
 led.high()
@@ -24,36 +25,43 @@ display = mySetup.createMyDisplay()
 print('Loading fonts...')
 print('Loading unispace')
 unispace = XglcdFont('lib/fonts/Unispace12x24.c', 12, 24)
+text = "Linia Kierunek      Odjazd"
+line = "1"
+direction = "Potulicka"
+departure = "za 12 min"
+
+
+
 
 display.clear()
-display.draw_rectangle(0,0,240,320,100 )
-display.draw_rectangle(0,0,200,300,200 )
-display.draw_text(0, 0, ili9341.__name__, unispace,
-                  ili9341.color565(255, 128, 0))
-display.draw_text(0, 25, ili9341.implementation.name, unispace,
-                  ili9341.color565(0, 0, 200))
-display.draw_text(0, 50, str(ili9341.implementation.version), unispace,
-                  ili9341.color565(0, 0, 200))
+display.draw_rectangle(0,0,320,240,100 )
+display.draw_rectangle(0,0,300,200,200 )
 
-display.draw_text(0, 100, "https://github.com/", unispace,
-                  ili9341.color565(200, 200, 200))
-display.draw_text(0, 125, "rdagger/micropython-ili9341", unispace,
-                  ili9341.color565(200, 200, 200))
-
-display.draw_text(0, 175, "ABCDEFGHIJKLMNOPQRS", unispace,
-                  ili9341.color565(200, 200, 200))
-display.draw_text(0, 200, "TUVWXYZ", unispace,
-                  ili9341.color565(200, 200, 200))
-display.draw_text(0, 225, "abcdefghijklmnopqrs", unispace,
-                  ili9341.color565(200, 200, 200))
-display.draw_text(0, 250, "tuvwxyz", unispace,
-                  ili9341.color565(200, 200, 200))
-display.draw_text(0, 275, "01234567890", unispace,
-                  ili9341.color565(200, 200, 200))
-display.draw_text(0, 300, "~!@#$%^&*()_+`-={}[]", unispace,
-                  ili9341.color565(200, 200, 200))
-display.draw_text(0, 325, "\|;:'<>,.?/", unispace,
-                  ili9341.color565(200, 200, 200)) 
+def board(linia, kierunek, odjazd):
+    text2 = '{:' '<3}'.format(linia[:3]) +\
+            ' ' + '{:' '<11}'.format(kierunek[:11]) +\
+            ' ' + '{:>9}'.format(odjazd[:9])
+            
+    display.draw_text(0, 0, text, unispace,
+                      ili9341.color565(10, 200, 252))  # ostatnia wyświetlana linia
+    display.draw_text(0, 36, text2, unispace,
+                      ili9341.color565(0, 0, 200))
+    display.draw_text(0, 72, text2, unispace,
+                      ili9341.color565(200, 200, 200))
+    display.draw_text(0, 108, text2, unispace,
+                      ili9341.color565(200, 200, 200))
+    display.draw_text(0, 144, text2, unispace,
+                      ili9341.color565(200, 200, 200))
+    display.draw_text(0, 180, text2, unispace,
+                      ili9341.color565(200, 200, 200))
+    display.draw_text(0, 216, text2, unispace,
+                      ili9341.color565(200, 20, 10))  # ostatnia wyświetlana linia
+    
+for i in range(999):
+    board(line, direction, departure)
+    utime.sleep(3)
+    line = f"{i}"
+    
 # for i in range(320):
 #     display.scroll(i)
 #     utime.sleep(0.02)
