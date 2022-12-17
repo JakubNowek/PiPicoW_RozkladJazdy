@@ -52,11 +52,12 @@ def connect_aval_wlan(list_of_wifi,wlan):
 
 def last_update_t():
     last_update = localtime()
-    print(f'Last update - {last_update[3]}:{last_update[4]:02d}:{last_update[5]:02d}')
+    return f'Last update - {last_update[3]}:{last_update[4]:02d}:{last_update[5]:02d}'
 
 
 def get_and_display(board_list):
     board = []
+    bus_stop = {"Name": None, "Departures":[], "Message": None, "Update": None}
     try:
         # Plac Galczynskiego (9)   
         #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875', timeout=15)
@@ -71,8 +72,8 @@ def get_and_display(board_list):
         
         # zamiana znakow HTML i polskich 
         text = txtReplace(text)
-        komunikat = txtReplace(komunikat)
-        board.append(board_list[1][0])
+        bus_stop["Name"] = board_list[1][0]
+        bus_stop["Message"] = txtReplace(komunikat)
         match = True
         while match:
             m = search(r'">(.+?)<\\*', text)
@@ -85,7 +86,6 @@ def get_and_display(board_list):
             else:
                 match = False
                 #print(dir(m.group(1)))
-        print(board)
-        print('Komunikat:',komunikat)
-        last_update_t()
-        print("------------------------")
+        bus_stop["Departures"] = board[4:]
+        bus_stop["Update"] = last_update_t()
+        return bus_stop
