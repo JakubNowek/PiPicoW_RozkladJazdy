@@ -1,26 +1,19 @@
-# TODO
-# zmiana przystanków
-# wyświetlanie na wyświetlaczu**
-# wyświetlanie polskich znaków****
-# import ili9341
+from re import search
 import urequests as requests
-import network
-import socket
-import ntptime
-from time import sleep, localtime
-from picozero import pico_led
+from network import WLAN, STA_IF
+#import socket
+from ntptime import host as ntphost 
+from time import sleep, localtime, ticks_ms
+#from picozero import pico_led
 from machine import reset, Timer
-import re
 from replaceunicode import txtReplace
 import json
 
-wlan = network.WLAN(network.STA_IF)
+# Preparing WLAN
+wlan = WLAN(STA_IF)
 wlan.active(True)
-pico_led.off()
 wlan.disconnect()
-
-ntptime.host = "tempus1.gum.gov.pl"
-
+ntphost = "tempus1.gum.gov.pl"
 
 def connect(wifi):
     ssid = wifi[0]
@@ -31,11 +24,11 @@ def connect(wifi):
     sleep(10)
     if wlan.isconnected() == True:    
         print('Connected to:',wlan.ifconfig())
-        pico_led.on()
+        #pico_led.on()
     else:
         print("Connection timed out")
         wlan.disconnect()
-        pico_led.off()
+        #pico_led.off()
     
     
 def connect_aval_wlan(list_of_wifi,wlan):
@@ -57,13 +50,11 @@ def connect_aval_wlan(list_of_wifi,wlan):
         print('No wifi avaliable')
         sleep(4)             
 
-
 def last_update_t():
     last_update = localtime()
     print(f'Last update - {last_update[3]}:{last_update[4]:02d}:{last_update[5]:02d}')
 
 
-# def get_stops(board_list):
 def get_and_display(board_list):
     board = []
     try:
@@ -98,21 +89,3 @@ def get_and_display(board_list):
         print('Komunikat:',komunikat)
         last_update_t()
         print("------------------------")
-
-    
-# generowanie przerwań cyklicznych do synchrnizacji czasu z serwerem ntp
-timer = Timer(period=18000000, mode=Timer.PERIODIC, callback=lambda t: ntptime.settime)
-   
-# wczytywanie danych sieci i ur przystanków z pliku konfiguracyjnego   
-with open('config.json', 'r') as f:
-    data = json.load(f)
-    wifi_list = data['networks']
-    stops_list = data['transport_stop']
-
-
-while True:
-    while wlan.isconnected() == False:
-        connect_aval_wlan(wifi_list,wlan)   
-        sleep(2)        
-    sleep(3)  # okres odświeżania
-    get_and_display(stops_list) 
