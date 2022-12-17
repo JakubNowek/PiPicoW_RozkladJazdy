@@ -10,38 +10,33 @@ led.high()
 display = mySetup.createMyDisplay()
 unispace = XglcdFont('lib/fonts/Unispace12x24.c', 12, 24)
 
-
-# def print_board(linia, kierunek, odjazd):
-#     text = "Linia Kierunek      Odjazd"
-#     text2 = '{:' '<3}'.format(linia[:3]) +\
-#             ' ' + '{:' '<11}'.format(kierunek[:11]) +\
-#             ' ' + '{:>9}'.format(odjazd[:9])          
-#     display.draw_text(0, 0, text, unispace,
-#                       ili9341.color565(10, 200, 252))  # ostatnia wyświetlana linia
-#     display.draw_text(0, 36, text2, unispace,
-#                       ili9341.color565(0, 0, 200))
-#     display.draw_text(0, 72, text2, unispace,
-#                       ili9341.color565(200, 200, 200))
-#     display.draw_text(0, 108, text2, unispace,
-#                       ili9341.color565(200, 200, 200))
-#     display.draw_text(0, 144, text2, unispace,
-#                       ili9341.color565(200, 200, 200))
-#     display.draw_text(0, 180, text2, unispace,
-#                       ili9341.color565(200, 200, 200))
-#     display.draw_text(0, 216, text2, unispace,
-#                       ili9341.color565(200, 20, 10))  # ostatnia wyświetlana linia
+# definicja kolorow linii tekstu na wyswietlaczu
+def_color = {"Head": ili9341.color565(10, 200, 252),
+             "First": ili9341.color565(0, 0, 200),
+             "Middle": ili9341.color565(200, 200, 200),
+             "Last": ili9341.color565(200, 20, 10)
+            }
     
     
-def print_board(data):
+def print_board(data,update,name):
+    
+    name = '{:' '<15}'.format(name[:11])
+    update = '{:' '>10}'.format(update)
     x = 0
     y = 0
     # define head
     text = "Linia Kierunek      Odjazd"
     display.draw_text(x, y, text, unispace,
-                      ili9341.color565(10, 200, 252))  # ostatnia wyświetlana linia
-    
+                      def_color["Head"])  # ostatnia wyświetlana linia
     for line in data:
         y+=36
+        if y==36:
+            color = def_color["First"]
+        elif y==72 or y==108 or y==144:
+            color = def_color["Middle"]
+        elif y==180:
+            color = def_color["Last"]
+            
         # read line
         linia, kierunek, odjazd = line[0], line[1], line[2]
         # line format
@@ -49,21 +44,10 @@ def print_board(data):
                 ' ' + '{:' '<11}'.format(kierunek[:11]) +\
                 ' ' + '{:>9}'.format(odjazd[:9])
         display.draw_text(0, y , text2, unispace,
-                      ili9341.color565(0, 0, 200))
-        
-              
-#     display.draw_text(0, 72, text2, unispace,
-#                       ili9341.color565(200, 200, 200))
-#     display.draw_text(0, 108, text2, unispace,
-#                       ili9341.color565(200, 200, 200))
-#     display.draw_text(0, 144, text2, unispace,
-#                       ili9341.color565(200, 200, 200))
-#     display.draw_text(0, 180, text2, unispace,
-#                       ili9341.color565(200, 200, 200))
-#     display.draw_text(0, 216, text2, unispace,
-#                       ili9341.color565(200, 20, 10))  # ostatnia wyświetlana linia
-
-    
+                          color)
+    display.draw_text(0, 216 , name+update, unispace,
+                          def_color["Head"])
+                   
     
 
 

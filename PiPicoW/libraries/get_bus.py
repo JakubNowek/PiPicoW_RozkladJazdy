@@ -52,18 +52,21 @@ def connect_aval_wlan(list_of_wifi,wlan):
 
 def last_update_t():
     last_update = localtime()
-    return f'Last update - {last_update[3]}:{last_update[4]:02d}:{last_update[5]:02d}'
+    return f'{last_update[3]}:{last_update[4]:02d}:{last_update[5]:02d}'
 
 
 def get_and_display(board_list):
+    """
+    Funkcja pobiera dane z linku url zawartego w board_list, przeksztalca je i zwraca w formie slownka
+    @param: board_list - slownik zawierajacy nazwe przystanku oraz adres url do jego danych
+    
+    @return slownik zawierajacy przetworzone (human readable) dane o przystanku 
+    """
     board = []
     bus_stop = {"Name": None, "Departures":[], "Message": None, "Update": None}
     try:
-        # Plac Galczynskiego (9)   
-        #res = requests.get(url='https://www.zditm.szczecin.pl/json/tablica.inc.php?lng=pl&slupek=12111&t=0.8450320169628875', timeout=15)
-        # Bogumily (9,1)
+        # Bogumily (9,1) - board_list[1][1]
         page = requests.get(url=board_list[1][1], timeout=15).json()
-        # wyswietlanie komunikatu przystanku
     except:
         print("HTTP response error")
     else:    
@@ -72,8 +75,10 @@ def get_and_display(board_list):
         
         # zamiana znakow HTML i polskich 
         text = txtReplace(text)
+        bus_stop["Message"] = txtReplace(komunikat)\
+                              
         bus_stop["Name"] = board_list[1][0]
-        bus_stop["Message"] = txtReplace(komunikat)
+        # ekstrakcja potrzebnych danych z pliku html
         match = True
         while match:
             m = search(r'">(.+?)<\\*', text)
@@ -85,7 +90,7 @@ def get_and_display(board_list):
                 board.append(found)
             else:
                 match = False
-                #print(dir(m.group(1)))
+                #print(dir(m.group(1)))        
         bus_stop["Departures"] = board[4:]
         bus_stop["Update"] = last_update_t()
         return bus_stop
