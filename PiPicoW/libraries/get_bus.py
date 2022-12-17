@@ -75,7 +75,7 @@ def get_and_display(board_list):
         board.append(board_list[1][0])
         match = True
         while match:
-            m = re.search(r'">(.+?)<\\*', text)
+            m = search(r'">(.+?)<\\*', text)
             if m:
                 match = True
                 found = m.group(1)
