@@ -15,6 +15,10 @@ wlan.active(True)
 wlan.disconnect()
 ntphost = "tempus1.gum.gov.pl"
 
+
+# starting busstop id
+stop_id = 0 
+
 def connect(wifi):
     ssid = wifi[0]
     passwd = wifi[1]
@@ -56,6 +60,7 @@ def last_update_t():
 
 
 def get_and_display(board_list):
+    global stop_id
     """
     Funkcja pobiera dane z linku url zawartego w board_list, przeksztalca je i zwraca w formie slownka
     @param: board_list - slownik zawierajacy nazwe przystanku oraz adres url do jego danych
@@ -66,7 +71,7 @@ def get_and_display(board_list):
     bus_stop = {"Name": None, "Departures":[], "Message": None, "Update": None}
     try:
         # Bogumily (9,1) - board_list[1][1]
-        page = requests.get(url=board_list[1][1], timeout=15).json()
+        page = requests.get(url=board_list[stop_id][1], timeout=15).json()
     except:
         print("HTTP response error")
     else:    
@@ -77,7 +82,7 @@ def get_and_display(board_list):
         text = txtReplace(text)
         bus_stop["Message"] = txtReplace(komunikat)\
                               
-        bus_stop["Name"] = board_list[1][0]
+        bus_stop["Name"] = board_list[stop_id][0]
         # ekstrakcja potrzebnych danych z pliku html
         match = True
         while match:
