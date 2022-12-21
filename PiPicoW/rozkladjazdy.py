@@ -3,8 +3,8 @@
 
 from get_bus import *
 from get_display import *
-
-
+# starting busstop id
+stop_id = 1 
 # defining input button pins for shifting stops
 prev_btn = 2
 next_btn = 3
@@ -19,21 +19,23 @@ def prev_btn_handler(pin):
     ch_prev.irq(handler=None)
     if stop_id != 0:
         stop_id -= 1
+    print("PRZERWANIE prev: ",stop_id)
     # debounce time - ignore any activity during this period
-    sleep(0.1)
+    sleep(1)
     # re-enable the IRQ
-    ch_prev.irq(trigger=Pin.IRQ_FALLING, handler = prev_btn_handler)  # change it to rising???
+    ch_prev.irq(trigger=Pin.IRQ_RISING, handler = prev_btn_handler)
     
-def next_btn_handler(pin, list_len):
+def next_btn_handler(pin):
     global stop_id
     # disable the IRQ during debounce chec
     ch_next.irq(handler=None)
-    if stop_id < list_len:
+    if stop_id == 0:
         stop_id += 1
+    print("PRZERWANIE next: ",stop_id)
     # debounce time - ignore any activity during this period
-    sleep(0.1)
+    sleep(1)
     # re-enable the IRQ
-    ch_next.irq(trigger=Pin.IRQ_FALLING, handler = next_btn_handler)  # change it to rising???
+    ch_next.irq(trigger=Pin.IRQ_RISING, handler = next_btn_handler)  # change it to rising???
   
   
 def chunks(lst, step):
@@ -41,9 +43,6 @@ def chunks(lst, step):
         yield tuple(lst[i:i + step])
         
         
-# enabling irq        
-ch_prev.irq(trigger=Pin.IRQ_FALLING, handler = prev_btn_handler)
-ch_next.irq(trigger=Pin.IRQ_FALLING, handler = next_btn_handler)
 
 # generowanie przerwań cyklicznych do synchrnizacji czasu z serwerem ntp
 timer = Timer(period=18000000, mode=Timer.PERIODIC, callback=lambda t: ntptime.settime)
@@ -54,14 +53,23 @@ with open('config.json', 'r') as f:
     wifi_list = data['networks']
     stops_list = data['transport_stop']
 
+# enabling irq
+ch_next.irq(trigger=Pin.IRQ_RISING, handler = next_btn_handler)
+ch_prev.irq(trigger=Pin.IRQ_RISING, handler = prev_btn_handler)
+
+
+# main loop
 while True:
     while wlan.isconnected() == False:
         connect_aval_wlan(wifi_list,wlan)   
         sleep(2)        
     sleep(3)  # okres odświeżania
-    bus_stop = get_and_display(stops_list) # pobieranie danych z przystanku
+    bus_stop = get_and_display(stops_list, stop_id) # pobieranie danych z przystanku
     
     departures = bus_stop["Departures"]
+    print(departures)
+    print("stop_id",stop_id)
+    print(bus_stop["Update"])
     # zamiana listy na listę tupli 3-elementowych
     dep = list(chunks(departures,3))[:5]
     print_board(dep,bus_stop["Update"],bus_stop["Name"]) 
