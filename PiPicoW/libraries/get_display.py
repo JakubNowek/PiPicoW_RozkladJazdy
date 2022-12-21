@@ -14,13 +14,14 @@ unispace = XglcdFont('lib/fonts/Unispace12x24.c', 12, 24)
 def_color = {"Head": ili9341.color565(10, 200, 252),
              "First": ili9341.color565(0, 0, 200),
              "Middle": ili9341.color565(200, 200, 200),
-             "Last": ili9341.color565(200, 20, 10)
+             "Last": ili9341.color565(200, 20, 10),
+             "Black":ili9341.color565(0,0,0) 
             }
     
     
 def print_board(data,update,name):
     
-    name = '{:' '<15}'.format(name[:11])
+    name = '{:' '<15}'.format(name[:15])
     update = '{:' '>10}'.format(update)
     x = 0
     y = 0
@@ -45,6 +46,7 @@ def print_board(data,update,name):
                 ' ' + '{:>9}'.format(odjazd[:9])
         display.draw_text(0, y , text2, unispace,
                           color)
+    # display.fill_hrect(200, 216 ,119 ,24, def_color["Black"]) 
     display.draw_text(0, 216 , name+update, unispace,
                           def_color["Head"])
                    
