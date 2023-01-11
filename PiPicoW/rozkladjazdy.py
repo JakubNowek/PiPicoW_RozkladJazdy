@@ -43,9 +43,9 @@ def chunks(lst, step):
         yield tuple(lst[i:i + step])
         
         
-
-# generowanie przerwań cyklicznych do synchrnizacji czasu z serwerem ntp
-timer = Timer(period=18000000, mode=Timer.PERIODIC, callback=lambda t: ntptime.settime)
+set_time()
+# generowanie przerwań cyklicznych do synchrnizacji czasu z serwerem ntp co 2h
+timer = Timer(period=7200000, mode=Timer.PERIODIC, callback=lambda t: set_time())
    
 # wczytywanie danych sieci i url przystanków z pliku konfiguracyjnego   
 with open('config.json', 'r') as f:
@@ -58,6 +58,9 @@ how_many_stops = len(stops_list)
 ch_next.irq(trigger=Pin.IRQ_RISING, handler = next_btn_handler)
 ch_prev.irq(trigger=Pin.IRQ_RISING, handler = prev_btn_handler)
 
+# starting message to ensure that the system is working
+start_msg()
+sleep(1)
 
 # main loop
 while True:
@@ -76,3 +79,4 @@ while True:
         print_board(dep,bus_stop["Update"],bus_stop["Name"]) 
     except:
         error_msg("AWARIA TABLICY",last_update_t())
+

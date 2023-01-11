@@ -5,6 +5,7 @@ import mySetup
 
 from machine import Pin, SPI
 from xglcd_font import XglcdFont
+from time import sleep
 led = Pin(21, Pin.OUT)
 led.high()
 display = mySetup.createMyDisplay()
@@ -56,7 +57,18 @@ def change_stop_sig(direction):
     display.fill_hrect(0, 216 ,319 ,24, def_color["Black"])
     display.draw_text(160, 216 , direction, unispace,
                           def_color["Head"])
+    
+    
 def error_msg(msg):
     display.fill_hrect(0, 216 ,319 ,24, def_color["Black"])
     display.draw_text(0, 216 , msg, unispace,
                           def_color["Head"])
+    
+    
+def start_msg():
+    msg = "Turning on"
+    display.clear()
+    display.draw_text(160, 120 , msg, unispace,
+                          def_color["Head"])
+    sleep(1)
+    display.clear()

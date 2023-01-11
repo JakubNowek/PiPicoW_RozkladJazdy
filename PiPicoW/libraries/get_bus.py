@@ -3,17 +3,42 @@ import urequests as requests
 from network import WLAN, STA_IF
 #import socket
 from ntptime import host as ntphost 
-from time import sleep, localtime, ticks_ms
+from time import sleep, localtime, ticks_ms, gmtime
 #from picozero import pico_led
-from machine import reset, Timer
+from machine import reset, Timer, RTC
 from replaceunicode import txtReplace
 import json
+
+import socket
+import struct
 
 # Preparing WLAN
 wlan = WLAN(STA_IF)
 wlan.active(True)
 wlan.disconnect()
-ntphost = "tempus1.gum.gov.pl"
+
+NTP_DELTA = 2208988800 - 3600
+host = "tempus1.gum.gov.pl"
+
+# https://gist.github.com/aallan/581ecf4dc92cd53e3a415b7c33a1147c
+def set_time():
+    NTP_QUERY = bytearray(48)
+    NTP_QUERY[0] = 0x1B
+    addr = socket.getaddrinfo(host, 123)[0][-1]
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.settimeout(1)
+        res = s.sendto(NTP_QUERY, addr)
+        msg = s.recv(48)
+    finally:
+        s.close()
+    val = struct.unpack("!I", msg[40:44])[0]
+    t = val - NTP_DELTA    
+    tm = gmtime(t)
+    RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0))
+
+
+
 
 
 def connect(wifi):
