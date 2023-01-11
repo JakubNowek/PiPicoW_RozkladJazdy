@@ -1,6 +1,3 @@
-# TODO
-# zmiana przystanków
-
 from get_bus import *
 from get_display import *
 # starting busstop id
@@ -19,9 +16,10 @@ def prev_btn_handler(pin):
     ch_prev.irq(handler=None)
     if stop_id != 0:
         stop_id -= 1
+    sleep(1)    
     print("PRZERWANIE prev: ",stop_id)
+    change_stop_sig("<")
     # debounce time - ignore any activity during this period
-    sleep(1)
     # re-enable the IRQ
     ch_prev.irq(trigger=Pin.IRQ_RISING, handler = prev_btn_handler)
     
@@ -32,9 +30,10 @@ def next_btn_handler(pin):
         ch_next.irq(handler=None)
         if stop_id < (how_many_stops-1):
             stop_id += 1
-        print("PRZERWANIE next: ",stop_id)
-        # debounce time - ignore any activity during this period
         sleep(1)
+        print("PRZERWANIE next: ",stop_id)
+        change_stop_sig(">")
+        # debounce time - ignore any activity during this period
         # re-enable the IRQ
         ch_next.irq(trigger=Pin.IRQ_RISING, handler = next_btn_handler)  # change it to rising???
   
@@ -67,12 +66,13 @@ while True:
         sleep(2)        
     sleep(3)  # okres odświeżania
     bus_stop = get_and_display(stops_list, stop_id) # pobieranie danych z przystanku
-    
-    departures = bus_stop["Departures"]
-    print(departures)
-    print("stop_id",stop_id)
-    print(bus_stop["Update"])
-    # zamiana listy na listę tupli 3-elementowych
-    dep = list(chunks(departures,3))[:5]
-    print_board(dep,bus_stop["Update"],bus_stop["Name"]) 
-    
+    try:
+        departures = bus_stop["Departures"]
+        print(departures)
+        print("stop_id",stop_id)
+        print(bus_stop["Update"])
+        # zamiana listy na listę tupli 3-elementowych
+        dep = list(chunks(departures,3))[:5]
+        print_board(dep,bus_stop["Update"],bus_stop["Name"]) 
+    except:
+        error_msg("AWARIA TABLICY",last_update_t())

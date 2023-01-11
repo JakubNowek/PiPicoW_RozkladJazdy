@@ -46,10 +46,17 @@ def print_board(data,update,name):
                 ' ' + '{:>9}'.format(odjazd[:9])
         display.draw_text(0, y , text2, unispace,
                           color)
-    # display.fill_hrect(200, 216 ,119 ,24, def_color["Black"]) 
+    # display.fill_hrect(200, 216 ,119 ,24, def_color["Black"])
+    # display stop name and time of update
     display.draw_text(0, 216 , name+update, unispace,
                           def_color["Head"])
                    
     
-
-
+def change_stop_sig(direction):
+    display.fill_hrect(0, 216 ,319 ,24, def_color["Black"])
+    display.draw_text(160, 216 , direction, unispace,
+                          def_color["Head"])
+def error_msg(msg):
+    display.fill_hrect(0, 216 ,319 ,24, def_color["Black"])
+    display.draw_text(0, 216 , msg, unispace,
+                          def_color["Head"])

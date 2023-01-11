@@ -76,7 +76,7 @@ def get_and_display(board_list, stp_ID):
         
         # zamiana znakow HTML i polskich 
         text = txtReplace(text)
-        bus_stop["Message"] = txtReplace(komunikat)\
+        bus_stop["Message"] = txtReplace(komunikat)
                               
         bus_stop["Name"] = board_list[stp_ID][0]
         # ekstrakcja potrzebnych danych z pliku html
