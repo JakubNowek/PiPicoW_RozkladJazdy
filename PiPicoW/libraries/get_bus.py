@@ -17,8 +17,9 @@ wlan = WLAN(STA_IF)
 wlan.active(True)
 wlan.disconnect()
 
-NTP_DELTA = 2208988800 - 3600
+NTP_DELTA = 2208988800 -3600
 host = "tempus1.gum.gov.pl"
+#host = "pool.ntp.org"
 
 # https://gist.github.com/aallan/581ecf4dc92cd53e3a415b7c33a1147c
 def set_time():
@@ -36,9 +37,6 @@ def set_time():
     t = val - NTP_DELTA    
     tm = gmtime(t)
     RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0))
-
-
-
 
 
 def connect(wifi):
@@ -71,10 +69,16 @@ def connect_aval_wlan(list_of_wifi,wlan):
         for n in range (0, len(access_list)):
             connect(access_list[n])
             if wlan.isconnected() == True:
-                break
+                break           
     else:
         print('No wifi avaliable')
-        sleep(4)             
+        sleep(4)
+    # if connected, synchronise RTC with NTP server    
+    try:
+        set_time()
+    except:
+        error_msg("BLAD POBIERANIA CZASU",last_update_t())
+        sleep(1)     
 
 def last_update_t():
     last_update = localtime()

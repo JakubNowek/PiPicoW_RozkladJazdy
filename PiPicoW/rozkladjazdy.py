@@ -41,9 +41,8 @@ def next_btn_handler(pin):
 def chunks(lst, step):
     for i in range(0, len(lst), step):
         yield tuple(lst[i:i + step])
-        
-        
-set_time()
+      
+    
 # generowanie przerwań cyklicznych do synchrnizacji czasu z serwerem ntp co 2h
 timer = Timer(period=7200000, mode=Timer.PERIODIC, callback=lambda t: set_time())
    
