@@ -4,7 +4,7 @@ The device displays current timetable of the chosen bus (tram) stop. It shows th
 
 
 ## Motivation 
-Every time you want to check a departure time of your bus/tram you need to open your phone app, then search for the specific line and then pick a direction. Most of the times however when I'm at home, I need to know information about departures from only or two stops (and boy, somtimes I need it fast). Back in the days we used to print the timetable, put it on the fridge and check every time before going out. However simple it was, we had to believe, that the beloved vehicle would arrive on time.
+Every time you want to check a departure time of your bus/tram you need to open your phone app, then search for the specific line and then pick a direction. Most of the times however when I'm at home, I need to know information about departures from only one or two stops (and boy, somtimes I need it fast). Back in the days we used to print the timetable, put it on the fridge and check every time before going out. However simple it was, we had to believe, that the beloved vehicle would arrive on time.
 
 ## Function
 What I propose here is a dynamic arrival board of every bus/tram you need, just like the ones installed on the stops. It shows the actual arrival time of the vehicle, including delays. It's best qualities are the **speed of use** - you get the information just by looking at it, and **reliability** - below the information about departures it displays the last data aquisition time (accurate to the second), so when something goes wrong with your internet connection or ZDiTM servers, you know when you're not getting current data. 

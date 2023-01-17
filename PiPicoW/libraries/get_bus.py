@@ -4,7 +4,6 @@ from network import WLAN, STA_IF
 #import socket
 from ntptime import host as ntphost 
 from time import sleep, localtime, ticks_ms, gmtime
-#from picozero import pico_led
 from machine import reset, Timer, RTC
 from replaceunicode import txtReplace
 import json
@@ -17,12 +16,18 @@ wlan = WLAN(STA_IF)
 wlan.active(True)
 wlan.disconnect()
 
-NTP_DELTA = 2208988800 -3600
+NTP_DELTA = 2208988800-3600  # -3600 for adjusting to local (Polish) timezone
 host = "tempus1.gum.gov.pl"
 #host = "pool.ntp.org"
 
 # https://gist.github.com/aallan/581ecf4dc92cd53e3a415b7c33a1147c
+
+
 def set_time():
+    """
+    Function synchronises local time with NTP server.
+    Created by https://gist.github.com/aallan/581ecf4dc92cd53e3a415b7c33a1147c
+    """
     NTP_QUERY = bytearray(48)
     NTP_QUERY[0] = 0x1B
     addr = socket.getaddrinfo(host, 123)[0][-1]
@@ -40,6 +45,12 @@ def set_time():
 
 
 def connect(wifi):
+    """
+    Function responsible for connecting to given wifi network.
+    @param: wifi - list containing wifi credentials
+    @param: wlan - WLAN object
+    
+    """
     ssid = wifi[0]
     passwd = wifi[1]
     #Connect to WLAN
@@ -47,23 +58,28 @@ def connect(wifi):
     print("Connecting to", ssid)
     sleep(10)
     if wlan.isconnected() == True:    
-        print('Connected to:',wlan.ifconfig())
-        #pico_led.on()
+        print('Connected to:', wlan.ifconfig())
     else:
         print("Connection timed out")
         wlan.disconnect()
-        #pico_led.off()
     
     
 def connect_aval_wlan(list_of_wifi,wlan):
-    # znajdowanie dostępnych wifi z listy
+    """
+    Function responsible for finding avaliable wifis from the given list and connecting
+    to one of them.
+    @param: list_of_wifi
+    @param: wlan - WLAN object
+    
+    """
+    # finding avaliable wifi from list
     wifi_scan = wlan.scan()
     access_list = []
     for network in wifi_scan:
         for wifi in list_of_wifi:
             if str(network[0].decode("utf-8")) == wifi[0]:
                 access_list.append(wifi)
-    # łączenie ze znalezionymi sieciami              
+    # connecting to found wifi             
     print('Nawiązywanie połączenia')
     if len(access_list) > 0:
         for n in range (0, len(access_list)):
@@ -80,22 +96,28 @@ def connect_aval_wlan(list_of_wifi,wlan):
         error_msg("BLAD POBIERANIA CZASU",last_update_t())
         sleep(1)     
 
+
 def last_update_t():
+    """
+    Function provides current time in for of an fstring (h:mm:ss)
+    
+    """
     last_update = localtime()
     return f'{last_update[3]}:{last_update[4]:02d}:{last_update[5]:02d}'
 
 
 def get_and_display(board_list, stp_ID):
     """
-    Funkcja pobiera dane z linku url zawartego w board_list, przeksztalca je i zwraca w formie slownka
-    @param: board_list - slownik zawierajacy nazwe przystanku oraz adres url do jego danych
+    Function aquires data from url address included in board_list, and transforms it into
+    dictionary containing information about chosen bus stop
+    @param: board_list - list containing names of bus stops, urls and public transport lines' numbers;
+    @param: stp_ID - ID of a given stop;
+    @return dictionary containing human readable data of a bus stop specified by stp_ID
     
-    @return slownik zawierajacy przetworzone (human readable) dane o przystanku 
     """
     board = []
     bus_stop = {"Name": None, "Departures":[], "Message": None, "Update": None}
     try:
-        # Bogumily (9,1) - board_list[1][1]
         page = requests.get(url=board_list[stp_ID][1], timeout=15).json()
     except:
         print("HTTP response error")
@@ -103,12 +125,12 @@ def get_and_display(board_list, stp_ID):
         text = page["tresc"]
         komunikat = page["komunikat"]
         
-        # zamiana znakow HTML i polskich 
+        # replacing html signs and Polish letters
         text = txtReplace(text)
-        bus_stop["Message"] = txtReplace(komunikat)
-                              
+        bus_stop["Message"] = txtReplace(komunikat)               
         bus_stop["Name"] = board_list[stp_ID][0]
-        # ekstrakcja potrzebnych danych z pliku html
+        
+        # extracting needed data from html file
         match = True
         while match:
             m = search(r'">(.+?)<\\*', text)
@@ -119,8 +141,7 @@ def get_and_display(board_list, stp_ID):
                 text = text[ind:]
                 board.append(found)
             else:
-                match = False
-                #print(dir(m.group(1)))        
+                match = False     
         bus_stop["Departures"] = board[4:]
         bus_stop["Update"] = last_update_t()
         return bus_stop

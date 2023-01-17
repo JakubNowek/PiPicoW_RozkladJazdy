@@ -2,16 +2,17 @@
 
 import ili9341
 import mySetup
-
 from machine import Pin, SPI
 from xglcd_font import XglcdFont
 from time import sleep
-led = Pin(21, Pin.OUT)
+
+
+led = Pin(21, Pin.OUT)  # pin 21 set high for additional 3.3V source
 led.high()
 display = mySetup.createMyDisplay()
 unispace = XglcdFont('lib/fonts/Unispace12x24.c', 12, 24)
 
-# definicja kolorow linii tekstu na wyswietlaczu
+# definition of colors needed for display
 def_color = {"Head": ili9341.color565(10, 200, 252),
              "First": ili9341.color565(0, 0, 200),
              "Middle": ili9341.color565(200, 200, 200),
@@ -21,7 +22,13 @@ def_color = {"Head": ili9341.color565(10, 200, 252),
     
     
 def print_board(data,update,name):
+    """
+    Function responsible for printing bus stop data on the display.
+    @param: data - data from bus stop to be printed
+    @param: update - time of an update
+    @param: name - name of the stop
     
+    """
     name = '{:' '<15}'.format(name[:15])
     update = '{:' '>10}'.format(update)
     x = 0
@@ -54,18 +61,30 @@ def print_board(data,update,name):
                    
     
 def change_stop_sig(direction):
+    """
+    Function responsible for signalising the stop change
+    
+    """
     display.fill_hrect(0, 216 ,319 ,24, def_color["Black"])
     display.draw_text(160, 216 , direction, unispace,
                           def_color["Head"])
     
     
 def error_msg(msg):
+    """
+    Function displays an error message in the botom of display
+    
+    """
     display.fill_hrect(0, 216 ,319 ,24, def_color["Black"])
     display.draw_text(0, 216 , msg, unispace,
                           def_color["Head"])
     
     
 def start_msg():
+    """
+    Function displays a start message
+    
+    """
     msg = "Turning on"
     display.clear()
     display.draw_text(160, 120 , msg, unispace,
